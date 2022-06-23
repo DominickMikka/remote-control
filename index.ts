@@ -125,6 +125,52 @@ wss.on('connection', ws => {
       }
 
       robot.mouseToggle('up');
+    } else 
+
+    if (message.startsWith('draw_square')) {
+      ws.send(message);
+      const [command, width] = message.toString().split(' ');
+
+      let currentMousePos = robot.getMousePos();
+
+      robot.setMouseDelay(1);
+      robot.mouseToggle('down');
+
+      let y = currentMousePos.y - +width;
+
+      while (currentMousePos.y !== y) {
+        robot.dragMouse(currentMousePos.x, currentMousePos.y);
+        currentMousePos.y--;
+      }
+
+      currentMousePos = robot.getMousePos();
+
+      let x = currentMousePos.x + +width;
+
+      while (currentMousePos.x !== x) {
+        robot.dragMouse(currentMousePos.x, currentMousePos.y);
+        currentMousePos.x++;
+      }
+
+      currentMousePos = robot.getMousePos();
+
+      y = currentMousePos.y + +width;
+
+      while (currentMousePos.y !== y) {
+        robot.dragMouse(currentMousePos.x, currentMousePos.y);
+        currentMousePos.y++;
+      }
+
+      currentMousePos = robot.getMousePos();
+
+      x = currentMousePos.x - +width;
+
+      while (currentMousePos.x !== x) {
+        robot.dragMouse(currentMousePos.x, currentMousePos.y);
+        currentMousePos.x--;
+      }
+
+      robot.mouseToggle('up');
     }
 
   });
