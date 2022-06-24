@@ -1,4 +1,4 @@
-import Jimp from 'jimp';
+import jimp from 'jimp';
 import robot from 'robotjs';
 import { WebSocketServer } from 'ws';
 import { readFile } from 'fs';
@@ -29,8 +29,9 @@ server.listen(HTTP_PORT, () => {
 });
 
 wss.on('connection', ws => {
-  ws.on('message', (buffer) => {
+  ws.on('message', async (buffer) => {
     const message = buffer.toString();
+    console.log(message);
     
     if (message.startsWith('mouse_up')) {
       ws.send(message);
@@ -72,7 +73,9 @@ wss.on('connection', ws => {
 
       robot.setMouseDelay(1);
 
-      for (let i = 0; i <= Math.PI * 2; i += 0.01) {
+      const step = 0.01 * Math.PI * 2;
+
+      for (let i = 0; i <= Math.PI * 2; i += step) {
         const x = currentMousePos.x + (+radius * Math.cos(i));
         const y = currentMousePos.y + (+radius * Math.sin(i));
         
@@ -171,7 +174,16 @@ wss.on('connection', ws => {
       }
 
       robot.mouseToggle('up');
-    }
+    } else
 
+    if (message === 'prnt_scrn') {
+      const currentMousePos = robot.getMousePos();
+      const capture = robot.screen.capture(currentMousePos.x - 100, currentMousePos.y - 100, 200, 200);
+      const img = new jimp(capture.width, capture.height);
+      img.bitmap.data = capture.image;
+      const base64 =  await img.getBase64Async(jimp.MIME_PNG);
+      const doneBuffer = base64.split(',')[1];
+      ws.send(`prnt_scrn ${doneBuffer}`);
+    }
   });
 });
