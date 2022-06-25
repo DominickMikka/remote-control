@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "Node16",
+    "module": "none",
     "moduleResolution": "node16",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "outDir": "./dist"
   }
 }
