@@ -1,7 +1,7 @@
 import { readFile } from 'fs';
 import { resolve, dirname } from 'path';
 import { createServer } from 'http';
-import { WebSocketServer } from 'ws';
+import { WebSocketServer, createWebSocketStream } from 'ws';
 import { mouseMove, mousePosition } from './src/modules/mouseNavigation';
 import { drawCircle } from './src/modules/drawCircle';
 import { drawRectangle } from './src/modules/drawRectangle';
@@ -25,8 +25,6 @@ const server = createServer((req, res) => {
   });
 });
 
-
-
 const wss = new WebSocketServer({ server });
 
 server.listen(HTTP_PORT, () => {
@@ -35,27 +33,29 @@ server.listen(HTTP_PORT, () => {
 
 wss.on('connection', ws => {
   ws.on('message', async (buffer) => {
+
+    const duplex = createWebSocketStream(ws, { encoding: 'utf8', decodeStrings: false });
     const message: string = buffer.toString();
     console.log(message);
 
     if (message.startsWith('mouse_up')) {
-      mouseMove(message, ws, 'mouseUp');
+      duplex.push(mouseMove(message, ws, 'mouseUp'));
     } else if (message.startsWith('mouse_down')) {
-      mouseMove(message, ws, 'mouseDown');
+      duplex.push(mouseMove(message, ws, 'mouseDown'));
     } else if (message.startsWith('mouse_left')) {
-      mouseMove(message, ws, 'mouseLeft');
+      duplex.push(mouseMove(message, ws, 'mouseLeft'));
     } else if (message.startsWith('mouse_right')) {
-      mouseMove(message, ws, 'mouseRight');
+      duplex.push(mouseMove(message, ws, 'mouseRight'));
     } else if (message.startsWith('mouse_position')) {
-      mousePosition(ws);
+      duplex.push(mousePosition(ws));
     } else if (message.startsWith('draw_circle')) {
-      drawCircle(message, ws);
+      duplex.push(drawCircle(message, ws));
     } else if (message.startsWith('draw_rectangle')) {
-      drawRectangle(message, ws);
+      duplex.push(drawRectangle(message, ws));
     } else if (message.startsWith('draw_square')) {
-      drawSquare(message, ws);
+      duplex.push(drawSquare(message, ws));
     } else if (message.startsWith('prnt_scrn')) {
-      printScreen(ws);
+      duplex.push(await printScreen(ws));
     }
   });
 });
